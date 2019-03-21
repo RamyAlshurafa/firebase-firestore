@@ -1,26 +1,51 @@
-import {firebase} from "./index"
+import { firebase, storage } from './index';
+import dishes from '../data/dishes';
 
-var db = firebase.firestore();
+const db = firebase.firestore();
 
-export const addNewDish = (dishData) => {
-  db.collection("dishes").add({
-    title: "steamed rice with viand",
-    rate: 3,
-    price: 75,
-    imageURL: "https://images.unsplash.com/photo-1543826173-1beeb97525d8?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=726&q=80"
-  })
-  .then(function(docRef) {
-    console.log("Document written with ID: ", docRef.id);
-  })
-  .catch(function(error) {
-    console.error("Error adding document: ", error);
-  });
-}
+export const addNewDish = (ref, dishData) => db.collection('dishes').doc(ref).set(dishData, { merge: true });
+
+
+export const initializeData = () => {
+  const promises = dishes.map(dish => addNewDish(dish.name, dish));
+  Promise.all(promises)
+    .then(() => {
+      console.log('Done');
+    }).catch((err) => {
+      console.log(err);
+    });
+};
 
 export const getAllDishes = () => {
-  db.collection("dishes").get().then((querySnapshot) => {
+  db.collection('dishes').get().then((querySnapshot) => {
     querySnapshot.forEach((doc) => {
-        console.log(`${doc.id} => ${doc.data()}`);
+      console.log(`${doc.id} => ${doc.data()}`);
     });
   });
-}
+};
+
+export const uploadImage = (file) => {
+// Create a root reference
+  const storageRef = storage.ref();
+
+  // // Create a reference to 'mountains.jpg'
+  // const mountainsRef = storageRef.child('mountains.jpg');
+
+  // Create a reference to 'images/mountains.jpg'
+  const mountainImagesRef = storageRef.child('images/1f622.png');
+
+
+  mountainImagesRef.put(file).then((snapshot) => {
+    console.log(snapshot);
+
+    console.log('Uploaded a blob or file!');
+  });
+};
+
+export const getImageURL = () => {
+  const pathReference = storage.ref('images/1f622.png');
+  pathReference.getDownloadURL().then((url) => {
+    // Insert url into an <img> tag to "download"
+    console.log(url, 'url');
+  });
+};
