@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Home from './Home';
 import {
-  addNewDish, uploadImage, getImageURL, initializeData,
+  initializeData,
 } from './firebase/functions';
 
 // eslint-disable-next-line react/prefer-stateless-function

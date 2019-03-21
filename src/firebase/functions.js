@@ -1,5 +1,5 @@
 import { firebase, storage } from './index';
-import dishes from '../data/dishes';
+import initialDishes from '../data/dishes';
 
 const db = firebase.firestore();
 
@@ -7,7 +7,7 @@ export const addNewDish = (ref, dishData) => db.collection('dishes').doc(ref).se
 
 
 export const initializeData = () => {
-  const promises = dishes.map(dish => addNewDish(dish.name, dish));
+  const promises = initialDishes.map(dish => addNewDish(dish.name, dish));
   Promise.all(promises)
     .then(() => {
       console.log('Done');
@@ -16,13 +16,15 @@ export const initializeData = () => {
     });
 };
 
-export const getAllDishes = () => {
+export const getAllDishes = () => new Promise((resolve) => {
   db.collection('dishes').get().then((querySnapshot) => {
+    const dishes = [];
     querySnapshot.forEach((doc) => {
-      console.log(`${doc.id} => ${doc.data()}`);
+      dishes.push(doc.data());
     });
+    resolve(dishes);
   });
-};
+});
 
 export const uploadImage = (file) => {
 // Create a root reference
