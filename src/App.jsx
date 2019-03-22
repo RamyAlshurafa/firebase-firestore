@@ -10,15 +10,10 @@ class App extends Component {
     initializeData();
   }
 
-  handleUploadFile = (e) => {
-
-  }
-
   render() {
     return (
       <div className="App">
         <Home />
-        <input type="file" onChange={this.handleUploadFile} />
       </div>
     );
   }

@@ -2,6 +2,8 @@
 /* eslint-disable jsx-a11y/label-has-for */
 import React, { Component } from 'react';
 
+import { createNewDishAndUploadImage } from '../firebase/functions';
+
 export default class Header extends Component {
   state = {
     modalDisplay: false,
@@ -37,7 +39,11 @@ export default class Header extends Component {
   }
 
   handleSubmit =() => {
-
+    const { imageFile, newDishName, newDishRate } = this.state;
+    createNewDishAndUploadImage(imageFile, newDishName, newDishRate).then(() => {
+      this.handleCloseModal();
+      window.location.reload();
+    });
   }
 
   render() {
@@ -52,13 +58,14 @@ export default class Header extends Component {
             <span className="badge badge-primary"><i className="fas fa-utensils" /></span>
               Yummiewheels
           </h5>
+
+          {/* Add Button */}
+          <button type="button" className="btn btn-primary float-right" data-toggle="modal" data-target="#exampleModal" onClick={this.handleOpenModal}>Add New Dish</button>
+
           <div className="w-100" />
           <form className="form-inline w-100">
             <input className="form-control mr-sm-2 w-100" type="search" placeholder="Search" aria-label="Search" />
           </form>
-
-          {/* Add Button */}
-          <button type="button" className="btn btn-primary" data-toggle="modal" data-target="#exampleModal" onClick={this.handleOpenModal}>Add New Dish</button>
         </nav>
 
         <div className="fade modal show " id="exampleModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style={{ display: modalDisplay ? 'block' : 'none' }}>

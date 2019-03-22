@@ -3,11 +3,11 @@ import initialDishes from '../data/dishes';
 
 const db = firebase.firestore();
 
-export const addNewDish = (ref, dishData) => db.collection('dishes').doc(ref).set(dishData, { merge: true });
+export const addNewDish = dishData => db.collection('dishes').doc(dishData.name).set(dishData, { merge: true });
 
 
 export const initializeData = () => {
-  const promises = initialDishes.map(dish => addNewDish(dish.name, dish));
+  const promises = initialDishes.map(dish => addNewDish(dish));
   Promise.all(promises)
     .then(() => {
       console.log('Done');
@@ -26,7 +26,7 @@ export const getAllDishes = () => new Promise((resolve) => {
   });
 });
 
-export const uploadImage = (file) => {
+export const uploadImage = file => new Promise((resolve, reject) => {
 // Create a root reference
   const storageRef = storage.ref();
 
@@ -34,20 +34,34 @@ export const uploadImage = (file) => {
   // const mountainsRef = storageRef.child('mountains.jpg');
 
   // Create a reference to 'images/mountains.jpg'
-  const mountainImagesRef = storageRef.child('images/1f622.png');
+  const mountainImagesRef = storageRef.child(`images/${file.name}`);
 
 
   mountainImagesRef.put(file).then((snapshot) => {
-    console.log(snapshot);
+    console.log(snapshot.ref.fullPath);
+    resolve(snapshot.ref.fullPath);
 
     console.log('Uploaded a blob or file!');
   });
-};
+});
 
-export const getImageURL = () => {
-  const pathReference = storage.ref('images/1f622.png');
+export const getImageURL = ref => new Promise((resolve, reject) => {
+  const pathReference = storage.ref(ref);
   pathReference.getDownloadURL().then((url) => {
     // Insert url into an <img> tag to "download"
-    console.log(url, 'url');
+    resolve(url);
   });
-};
+});
+
+export const createNewDishAndUploadImage = (file, name, rate) => new Promise((resolve, reject) => {
+  uploadImage(file).then((ref) => {
+    getImageURL(ref).then((url) => {
+      const newDish = {
+        name,
+        rate,
+        url,
+      };
+      addNewDish(newDish).then(resolve);
+    });
+  });
+});
